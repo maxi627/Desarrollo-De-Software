@@ -9,4 +9,4 @@ class Usuario(db.Model):
     nombre: str = db.Column('nombre',db.String(100), nullable=False)
     email: str = db.Column('email',db.String(120), unique=True, nullable=False)
     contrasena: str= db.Column('contrasena',db.String(100), nullable=False)
-    id_pedido: int= db.colummn('id_pedido',db.integer,db.ForeignKey(''),nullable=False)
+    id_pedido: int= db.colummn('id_pedido',db.integer,db.ForeignKey(''),unique=True,nullable=False)

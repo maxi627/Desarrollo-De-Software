@@ -5,9 +5,9 @@ from app.models.producto import Producto
 class ProductoSchema(Schema):
     id_producto = fields.Integer(dump_only=True)
     nombre = fields.String(required=True)
-    precio = fields.Integer(dump_only=True)
-    stock = fields.Integer(dump_only=True)
-    id_categoria = fields.Nested("PostCategorias", many=True, only=(""))
+    precio = fields.Integer(required=True)
+    stock = fields.Integer(required=True)
+    id_categoria = fields.Nested("CategoriaSchema", many=False)
 
     @post_load
     def make_producto(self, data, **kwargs):

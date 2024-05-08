@@ -1,7 +1,7 @@
 from marshmallow import fields, Schema, post_load
-from app.models import Orden
+from app.models.orden import Orden
 
-# Esquema para el modelo orden:
+# Esquema para el modelo Orden:
 class OrdenSchema(Schema):
     id_detalle = fields.Integer(dump_only=True)
     id_pedido = fields.Integer(required=True)
@@ -12,4 +12,3 @@ class OrdenSchema(Schema):
     @post_load
     def make_orden(self, data, **kwargs):
         return Orden(**data)
-
