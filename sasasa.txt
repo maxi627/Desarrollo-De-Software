@@ -1,0 +1,513 @@
+# Te paso la base de un proyecto el cual hay modificar para hacerlo un Blog Personalizado: Desarrolla un blog personalizado 
+# con funciones como crear, editar y eliminar publicaciones. Los usuarios pueden registrarse, iniciar sesión 
+# y gestionar sus propios blogs. me podes combertir este proyecto en un blog personalizado?
+
+Proyecto/
+│
+├── env/
+|
+├── app.py
+│
+└── app/
+    ├── config/
+    |   ├── __init__.py
+    |   └── config.py
+    |
+    ├── mapping/
+    |   ├── __init__.py
+    |   ├── categoria_schema.py
+    |   ├── estado_schema.py
+    |   ├── tarea_schema.py
+    |   └── usuario_schema.py
+    |
+    ├── models/
+    |   ├── __init__.py
+    |   ├── categoria.py
+    |   ├── estado.py
+    |   ├── tarea.py
+    |   └── usuario.py
+    |
+    ├── repositories/
+    |   ├── __init__.py
+    |   └── tarea_repository.py
+    |
+    ├── resource/
+    |   ├── __init__.py
+    |   ├── home.py
+    |   └── tarea_resource.py
+    |
+    ├── services/
+    |   ├── __init__.py
+    |   └── tarea_service.py
+    |
+    └── __init__.py
+
+ruta: Proyecto/app.py
+from app import create_app, db
+
+app = create_app()
+app.app_context().push()
+
+    
+if __name__ == '__main__':
+    db.create_all()
+    app.run(host="0.0.0.0", port=5000)
+
+ruta: Proyecto/app/__init__.py
+# Importación de módulos necesarios
+import os  # Módulo para interactuar con el sistema operativo
+from flask import Flask  # Importa la clase Flask para la aplicación web
+from flask_marshmallow import Marshmallow  # Para serialización/deserialización
+from flask_migrate import Migrate  # Gestión de migraciones de bases de datos
+from flask_sqlalchemy import SQLAlchemy  # Herramienta ORM para trabajar con bases de datos
+from app.config import config  # Importa la configuración de la aplicación
+
+# Inicialización de extensiones Flask
+db = SQLAlchemy()  # Instancia de SQLAlchemy para la base de datos
+ma = Marshmallow()  # Instancia de Marshmallow para la serialización/deserialización
+migrate = Migrate()  # Instancia de Migrate para gestionar las migraciones
+
+# Función para crear la aplicación Flask
+def create_app() -> None:
+    # Obtiene la configuración del entorno (por defecto 'development')
+    config_name = os.getenv('FLASK_ENV')
+
+    # Crea la instancia de la aplicación Flask
+    app = Flask(__name__)
+
+    # Carga la configuración desde el archivo de configuración específico
+    f = config.factory(config_name if config_name else 'development')
+    app.config.from_object(f)
+
+    # Inicializa la configuración de la aplicación
+    f.init_app(app)
+
+    # Inicializa las extensiones de la aplicación Flask
+    db.init_app(app)
+    ma.init_app(app)
+    migrate.init_app(app, db)  # Inicializa Migrate con la base de datos
+
+    # Importa las rutas (blueprints) desde los módulos y las registra en la aplicación
+    from app.resources import home, tarea
+    app.register_blueprint(home, url_prefix='/api/v1')  # Registra las rutas para el módulo home
+    app.register_blueprint(tarea, url_prefix='/api/v1/tareas')  # Registra las rutas para el módulo tarea
+
+    # Define el contexto para el intérprete interactivo (shell)
+    @app.shell_context_processor    
+    def ctx():
+        return {
+            "app": app,  # Pasa la instancia de la aplicación Flask
+            'db' : db     # Pasa la instancia de SQLAlchemy (base de datos)
+        }
+    
+    # Retorna la instancia de la aplicación Flask configurada
+    return app
+
+ruta: Proyecto/app/config/__init__.py
+vacio
+
+ruta: Proyecto/app/config/config.py
+"""
+Configuración de la aplicación
+"""
+# Importación de módulos necesarios
+from pathlib import Path  # Para manejar rutas de archivos y directorios
+import os  # Para interactuar con el sistema operativo
+from dotenv import load_dotenv  # Para cargar variables de entorno desde un archivo .env
+
+# Obtiene la ruta absoluta del directorio base de la aplicación
+basedir = os.path.abspath(Path(__file__).parents[2])
+
+# Carga las variables de entorno desde el archivo .env en el directorio base
+load_dotenv(os.path.join(basedir, '.env'))
+
+# Clase base de configuración de la aplicación
+class Config(object):
+    TESTING = False  # Configuración de prueba desactivada por defecto
+    SQLALCHEMY_TRACK_MODIFICATIONS = False  # Desactiva el seguimiento de modificaciones en SQLAlchemy
+    SQLALCHEMY_RECORD_QUERIES = True  # Habilita el registro de consultas en SQLAlchemy
+    
+    @staticmethod
+    def init_app(app):
+        pass  # Método para inicializar la aplicación (puede implementarse en subclases)
+        
+# Configuración específica para el entorno de desarrollo
+class DevelopmentConfig(Config):
+    TESTING = True  # Activa el modo de prueba
+    DEBUG = True  # Activa el modo de depuración
+    FLASK_ENV = 'development'  # Define el entorno como desarrollo
+    SQLALCHEMY_TRACK_MODIFICATIONS = True  # Habilita el seguimiento de modificaciones en SQLAlchemy
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE_URI')  # Obtiene la URI de la base de datos de variables de entorno
+
+"""
+Configuración en entorno de producción
+"""
+# Configuración específica para el entorno de producción
+class ProductionConfig(Config):
+    FLASK_ENV = 'production'  # Define el entorno como producción
+    DEBUG = False  # Desactiva el modo de depuración
+    TESTING = False  # Desactiva el modo de prueba
+    SQLALCHEMY_RECORD_QUERIES = False  # Desactiva el registro de consultas en SQLAlchemy
+    SQLALCHEMY_DATABASE_URI = os.environ.get('PROD_DATABASE_URI')  # Obtiene la URI de la base de datos de variables de entorno
+    
+    @classmethod
+    def init_app(cls, app):
+        Config.init_app(app)  # Llama al método init_app de la clase base Config para inicializar la aplicación
+
+"""
+Factory para la configuración de la aplicación
+param: entorno -> Entorno de ejecución de la aplicación
+"""
+# Factory para seleccionar la configuración de la aplicación según el entorno
+def factory(entorno: str):
+    # Diccionario que mapea nombres de entornos con sus respectivas configuraciones
+    configuration = {
+        'development': DevelopmentConfig,
+        'production': ProductionConfig
+    }
+    
+    return configuration[entorno]  # Retorna la configuración correspondiente al entorno dado
+
+ruta: Proyecto/app/mapping/__init__.py
+from .usuario_schema import UsuarioSchema
+from .categoria_schema import CategoriaSchema
+from .estado_schema import EstadoSchema
+from .tarea_schema import TareaSchema
+
+ruta: Proyecto/app/mapping/categoria_schema.py
+from app.models import Categoria  # Importa la clase Categoria del módulo app.models
+from marshmallow import validate, fields, Schema, post_load  # Importa funciones y clases de Marshmallow
+
+# Define el esquema (Schema) para la clase Categoria
+class CategoriaSchema(Schema):
+    # Define campos del esquema y establece reglas de validación y serialización
+
+    id = fields.Integer(dump_only=True)  # Campo 'id' de tipo Integer (solo para volcado/serialización)
+    nombre = fields.String(required=True)  # Campo 'nombre' de tipo String obligatorio
+    descripcion = fields.String()  # Campo 'descripcion' de tipo String
+
+    # Campo 'tareas' que anida el esquema de la clase 'Tarea'
+    tareas = fields.Nested("TareaSchema", many=True, only=("id", "fecha", "duracion", "descripcion"))
+
+    # Método para manejar la carga de datos (deserialización)
+    @post_load
+    def make_categoria(self, data, **kwargs):
+        return Categoria(**data)  # Crea una instancia de la clase Categoria con los datos deserializados
+
+ruta: Proyecto/app/mapping/estado_schema.py
+from app.models import Estado  # Importa la clase Estado del módulo app.models
+from marshmallow import validate, fields, Schema, post_load  # Importa las funciones y clases de Marshmallow
+
+# Define el esquema (Schema) para la clase Estado
+class EstadoSchema(Schema):
+    # Define campos del esquema y establece reglas de validación y serialización
+
+    id = fields.Integer(dump_only=True)  # Campo 'id' de tipo Integer (solo para volcado/serialización)
+    nombre = fields.String(required=True, validate=validate.Length(min=2, max=120))  # Campo 'nombre' de tipo String con validación de longitud
+    descripcion = fields.String()  # Campo 'descripcion' de tipo String
+
+    # Campo 'estados_tareas' que anida el esquema de la clase 'Tarea'
+    estados_tareas = fields.Nested("TareaSchema", many=True, only=("id", "fecha", "duracion", "descripcion"))
+
+    # Método para manejar la carga de datos (deserialización)
+    @post_load
+    def make_estado(self, data, **kwargs):
+        return Estado(**data)  # Crea una instancia de la clase Estado con los datos deserializados
+
+ruta: Proyecto/app/mapping/tarea_schema.py
+from app.models import Tarea  # Importa la clase Tarea del módulo app.models
+from marshmallow import validate, fields, Schema, post_load  # Importa funciones y clases de Marshmallow
+
+# Define el esquema (Schema) para la clase Tarea
+class TareaSchema(Schema):
+    # Define campos del esquema y establece reglas de validación y serialización
+
+    id = fields.Integer(dump_only=True)  # Campo 'id' de tipo Integer (solo para volcado/serialización)
+    fecha = fields.DateTime(required=True)  # Campo 'fecha' de tipo DateTime obligatorio
+    duracion = fields.TimeDelta(required=True)  # Campo 'duracion' de tipo TimeDelta obligatorio
+    descripcion = fields.String(required=True)  # Campo 'descripcion' de tipo String obligatorio
+    creador_id = fields.Integer(required=True)  # Campo 'creador_id' de tipo Integer obligatorio
+    ejecutante_id = fields.Integer(required=True)  # Campo 'ejecutante_id' de tipo Integer obligatorio
+    categoria_id = fields.Integer(required=True)  # Campo 'categoria_id' de tipo Integer obligatorio
+    estado_id = fields.Integer(required=True)  # Campo 'estado_id' de tipo Integer obligatorio
+    
+    # Campos anidados para relaciones con otras clases
+    creador = fields.Nested("UsuarioSchema", only=("id", "nombre", "apellido", "email"))  # Anida el esquema de Usuario para el campo 'creador'
+    ejecutante = fields.Nested("UsuarioSchema", only=("id", "nombre", "apellido", "email"))  # Anida el esquema de Usuario para el campo 'ejecutante'
+    categoria = fields.Nested("CategoriaSchema", only=("id", "nombre", "descripcion"))  # Anida el esquema de Categoria para el campo 'categoria'
+    estado = fields.Nested("EstadoSchema", only=("id", "nombre", "descripcion"))  # Anida el esquema de Estado para el campo 'estado'
+
+    # Método para manejar la carga de datos (deserialización)
+    @post_load
+    def make_tarea(self, data, **kwargs):
+        return Tarea(**data)  # Crea una instancia de la clase Tarea con los datos deserializados
+
+ruta: Proyecto/app/mapping/usuario_schema.py
+from app.models import Usuario  # Importa la clase Usuario del módulo app.models
+from marshmallow import validate, Schema, fields, post_load  # Importa funciones y clases de Marshmallow
+
+# Define el esquema (Schema) para la clase Usuario
+class UsuarioSchema(Schema):
+    # Define campos del esquema y establece reglas de validación y serialización
+
+    id = fields.Integer(dump_only=True)  # Campo 'id' de tipo Integer (solo para volcado/serialización)
+    nombre = fields.String(required=True, validate=validate.Length(min=2, max=120))  # Campo 'nombre' de tipo String obligatorio con validación de longitud
+    apellido = fields.String(required=True, validate=validate.Length(min=2, max=120))  # Campo 'apellido' de tipo String obligatorio con validación de longitud
+    email = fields.String(required=True, validate=validate.Email())  # Campo 'email' de tipo String obligatorio con validación de email
+    password = fields.String(load_only=True)  # Campo 'password' de tipo String (solo para carga/deserialización)
+
+    # Método para manejar la carga de datos (deserialización)
+    @post_load
+    def make_usuario(self, data, **kwargs):
+        return Usuario(**data)  # Crea una instancia de la clase Usuario con los datos deserializados
+
+ruta: Proyecto/app/models/__init__.py
+from .tarea import Tarea
+from .usuario import Usuario
+from .categoria import Categoria
+from .estado import Estado
+
+ruta: Proyecto/app/models/categoria.py
+# Importación de módulos necesarios
+from dataclasses import dataclass  # Importa dataclass para definir una clase de datos
+from app import db  # Importa el objeto 'db' de SQLAlchemy desde la aplicación Flask
+
+# Decorador dataclass para definir la clase Categoria
+@dataclass
+class Categoria(db.Model):
+    __tablename__ = 'categorias'  # Nombre de la tabla en la base de datos
+    id: int = db.Column('id', db.Integer, primary_key=True, autoincrement=True)  # Columna de ID como clave primaria
+    nombre: str = db.Column('nombre', db.String(120), nullable=False)  # Columna 'nombre' de tipo String (no puede ser nulo)
+    descripcion: str = db.Column('descripcion', db.String(120))  # Columna 'descripcion' de tipo String
+
+    # Relación con la clase 'Tarea' a través del atributo 'categoria'
+    tareas = db.relationship('Tarea', back_populates='categoria', lazy=True)
+
+ruta: Proyecto/app/models/estado.py
+from app import db  # Importa el objeto 'db' de SQLAlchemy desde la aplicación Flask
+from dataclasses import dataclass  # Importa dataclass para definir una clase de datos
+
+@dataclass  # Decorador dataclass para definir la clase Estado
+class Estado(db.Model):
+    __tablename__ = 'estados'  # Nombre de la tabla en la base de datos para los estados
+    id: int = db.Column('id', db.Integer, primary_key=True, autoincrement=True)  # Columna de ID como clave primaria
+    nombre: str = db.Column('nombre', db.String(120), nullable=False)  # Columna 'nombre' de tipo String (no puede ser nulo)
+    descripcion: str = db.Column('descripcion', db.String(120))  # Columna 'descripcion' de tipo String
+
+    # Relación con la clase 'Tarea' a través del atributo 'estado'
+    estados_tareas = db.relationship('Tarea', back_populates='estado', lazy=True)
+
+ruta: Proyecto/app/models/tarea.py
+from dataclasses import dataclass  # Importa dataclass para definir una clase de datos
+from datetime import datetime  # Importa datetime para manejar objetos de fecha y hora
+from app import db  # Importa el objeto 'db' de SQLAlchemy desde la aplicación Flask
+
+# Define la clase Tarea como un modelo de SQLAlchemy y una dataclass
+@dataclass
+class Tarea(db.Model):
+    __tablename__ = 'tareas'  # Nombre de la tabla en la base de datos
+    
+    # Definición de columnas en la tabla 'tareas'
+    id: int = db.Column('id', db.Integer, primary_key=True, autoincrement=True)  # Columna de ID como clave primaria
+    fecha: datetime = db.Column('fecha', db.DateTime, default=datetime.utcnow, nullable=False)  # Columna 'fecha' de tipo DateTime con valor por defecto y no nula
+    duracion: datetime = db.Column('duracion', db.Interval, nullable=False)  # Columna 'duracion' de tipo Interval y no nula
+    descripcion = db.Column('descripcion', db.String(120), nullable=False)  # Columna 'descripcion' de tipo String y no nula
+
+    # Relaciones con otras tablas (Usuarios, Categorias, Estados)
+    creador_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'))  # Columna para el ID del creador, clave foránea a la tabla 'usuarios'
+    creador = db.relationship("Usuario", foreign_keys=[creador_id])  # Relación con la tabla 'usuarios'
+
+    ejecutante_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'))  # Columna para el ID del ejecutante, clave foránea a la tabla 'usuarios'
+    ejecutante = db.relationship("Usuario", foreign_keys=[ejecutante_id])  # Relación con la tabla 'usuarios'
+
+    categoria_id = db.Column(db.Integer, db.ForeignKey('categorias.id'))  # Columna para el ID de la categoría, clave foránea a la tabla 'categorias'
+    categoria = db.relationship("Categoria", back_populates='tareas')  # Relación con la tabla 'categorias'
+
+    estado_id = db.Column(db.Integer, db.ForeignKey('estados.id'))  # Columna para el ID del estado, clave foránea a la tabla 'estados'
+    estado = db.relationship("Estado", back_populates='estados_tareas')  # Relación con la tabla 'estados'
+
+ruta: Proyecto/app/models/usuario.py
+from app import db  # Importa el objeto 'db' de SQLAlchemy desde la aplicación Flask
+from dataclasses import dataclass  # Importa dataclass para definir una clase de datos
+
+# Define la clase Usuario como un modelo de SQLAlchemy y una dataclass
+@dataclass
+class Usuario(db.Model):
+    __tablename__ = 'usuarios'  # Nombre de la tabla en la base de datos
+    
+    # Definición de columnas en la tabla 'usuarios'
+    id: int = db.Column('id', db.Integer, primary_key=True, autoincrement=True)  # Columna de ID como clave primaria
+    nombre: str = db.Column('nombre', db.String(120))  # Columna 'nombre' de tipo String
+    apellido: str = db.Column('apellido', db.String(120))  # Columna 'apellido' de tipo String
+    email: str = db.Column('email', db.String(120))  # Columna 'email' de tipo String
+    password: str = db.Column('password', db.String(120))  # Columna 'password' de tipo String
+    
+    # Relaciones con la tabla 'Tarea' a través de ForeignKey y relaciones definidas por SQLAlchemy
+    tareas_creador = db.relationship('Tarea', primaryjoin="Usuario.id == Tarea.creador_id", back_populates='creador', lazy=True)  # Relación con las tareas creadas por este usuario
+    tareas_ejecutante = db.relationship('Tarea', primaryjoin="Usuario.id == Tarea.ejecutante_id", back_populates='ejecutante', lazy=True)  # Relación con las tareas en las que este usuario es ejecutante
+
+ruta: Proyecto/app/repositories/__init__.py
+from .tarea_repository import TareaRepository
+
+ruta: Proyecto/app/repositories/tarea_repository.py
+from app.models import Tarea  # Importa la clase Tarea desde el módulo app.models
+from app import db  # Importa el objeto 'db' de SQLAlchemy desde la aplicación Flask
+
+class TareaRepository:
+    def __init__(self):
+        self.__model = Tarea  # Inicializa el modelo Tarea como una propiedad privada
+
+    def get_all(self) -> list[Tarea]:
+        return db.session.query(self.__model).all()  # Obtiene todas las instancias de Tarea de la base de datos
+
+    def get_by_id(self, id) -> Tarea:
+        return db.session.query(self.__model).get(id)  # Obtiene una instancia de Tarea por su ID
+
+    def create(self, entity: Tarea) -> Tarea:
+        db.session.add(entity)  # Agrega una nueva entidad de Tarea a la sesión
+        db.session.commit()  # Confirma los cambios en la base de datos
+        return entity  # Devuelve la entidad Tarea creada
+
+    def update(self, id, t: Tarea) -> Tarea:
+        entity = self.get_by_id(id)  # Obtiene la instancia de Tarea por su ID
+        # Actualiza los atributos de la instancia de Tarea con los valores proporcionados
+        entity.fecha = t.fecha
+        entity.duracion = t.duracion
+        entity.descripcion = t.descripcion
+        entity.creador_id = t.creador_id
+        entity.ejecutante_id = t.ejecutante_id
+        entity.categoria_id = t.categoria_id
+        entity.estado_id = t.estado_id
+        db.session.add(entity)  # Agrega la entidad actualizada a la sesión
+        db.session.commit()  # Confirma los cambios en la base de datos
+        return entity  # Devuelve la entidad Tarea actualizada
+
+    def delete(self, id) -> bool:
+        tarea = self.get_by_id(id)  # Obtiene la instancia de Tarea por su ID
+        db.session.delete(tarea)  # Elimina la entidad Tarea de la sesión
+        db.session.commit()  # Confirma los cambios en la base de datos
+        return tarea  # Devuelve la instancia Tarea eliminada
+
+ruta: Proyecto/app/resource/__init__.py
+from .home import home
+from .tarea_resource import tarea
+
+ruta: Proyecto/app/resource/home.py
+from flask import jsonify, Blueprint  # Importa las funciones jsonify y Blueprint desde Flask
+
+home = Blueprint('home', __name__)  # Crea un blueprint llamado 'home'
+
+@home.route('/', methods=['GET'])
+def index():
+    resp = jsonify("OK")  # Crea una respuesta JSON con el mensaje "OK"
+    resp.status_code = 200  # Establece el código de estado HTTP 200 (OK)
+    return resp  # Devuelve la respuesta JSON con el mensaje "OK" y el código de estado 200
+
+ruta: Proyecto/app/resource/tarea_resource.py
+from flask import jsonify, Blueprint, request  # Importa funciones y clases de Flask
+from app.mapping import TareaSchema  # Importa el esquema TareaSchema
+from app.services import TareaService  # Importa el servicio TareaService
+
+tarea = Blueprint('tarea', __name__)  # Crea un blueprint llamado 'tarea'
+service = TareaService()  # Inicializa el servicio TareaService
+tarea_schema = TareaSchema()  # Inicializa el esquema TareaSchema
+
+"""
+Obtiene todas las Tareas
+"""
+# Define una ruta para obtener todas las Tareas
+@tarea.route('/', methods=['GET'])
+def all():
+    resp = tarea_schema.dump(service.get_all(), many=True)
+    return resp, 200  # Retorna la respuesta JSON con el código de estado 200 (OK)
+
+"""
+Obtiene una Tarea por id
+"""
+# Define una ruta para obtener una Tarea por su ID
+@tarea.route('/<int:id>', methods=['GET'])
+def one(id):
+    resp = tarea_schema.dump(service.get_by_id(id))
+    return resp, 200  # Retorna la respuesta JSON con el código de estado 200 (OK)
+
+"""
+Crea nueva Tarea
+"""
+# Define una ruta para crear una nueva Tarea
+@tarea.route('/', methods=['POST'])
+def create():
+    tarea = tarea_schema.load(request.json)
+    resp = tarea_schema.dump(service.create(tarea))
+    return resp, 201  # Retorna la respuesta JSON con el código de estado 201 (CREATED)
+
+"""
+Actualiza una Tarea existente
+"""
+# Define una ruta para actualizar una Tarea existente por su ID
+@tarea.route('/<int:id>', methods=['PUT'])
+def update(id):
+    tarea = tarea_schema.load(request.json)
+    resp = tarea_schema.dump(service.update(id, tarea))
+    return resp, 200  # Retorna la respuesta JSON con el código de estado 200 (OK)
+
+"""
+Elimina una Tarea existente
+"""
+# Define una ruta para eliminar una Tarea existente por su ID
+@tarea.route('/<int:id>', methods=['DELETE'])
+def delete(id):
+    msg = "Tarea eliminada correctamente"
+    resp = service.delete(id)
+    if not resp:
+        msg = "No se pudo eliminar la Tarea"
+    return jsonify(msg), 204  # Retorna un mensaje JSON con el código de estado 204 (NO CONTENT)
+
+ruta: Proyecto/app/services/__init__.py
+from .tarea_service import TareaService
+
+ruta: Proyecto/app/services/tarea_service.py
+from flask import jsonify, Blueprint, request  # Importa funciones y clases de Flask
+from app.mapping import TareaSchema  # Importa el esquema TareaSchema
+from app.services import TareaService  # Importa el servicio TareaService
+
+tarea = Blueprint('tarea', __name__)  # Crea un blueprint llamado 'tarea'
+service = TareaService()  # Inicializa el servicio TareaService
+tarea_schema = TareaSchema()  # Inicializa el esquema TareaSchema
+
+# Define una ruta para obtener todas las Tareas
+@tarea.route('/', methods=['GET'])
+def all():
+    resp = tarea_schema.dump(service.get_all(), many=True)
+    return resp, 200  # Retorna la respuesta JSON con el código de estado 200 (OK)
+
+# Define una ruta para obtener una Tarea por su ID
+@tarea.route('/<int:id>', methods=['GET'])
+def one(id):
+    resp = tarea_schema.dump(service.get_by_id(id))
+    return resp, 200  # Retorna la respuesta JSON con el código de estado 200 (OK)
+
+# Define una ruta para crear una nueva Tarea
+@tarea.route('/', methods=['POST'])
+def create():
+    tarea = tarea_schema.load(request.json)
+    resp = tarea_schema.dump(service.create(tarea))
+    return resp, 201  # Retorna la respuesta JSON con el código de estado 201 (CREATED)
+
+# Define una ruta para actualizar una Tarea existente por su ID
+@tarea.route('/<int:id>', methods=['PUT'])
+def update(id):
+    tarea = tarea_schema.load(request.json)
+    resp = tarea_schema.dump(service.update(id, tarea))
+    return resp, 200  # Retorna la respuesta JSON con el código de estado 200 (OK)
+
+# Define una ruta para eliminar una Tarea existente por su ID
+@tarea.route('/<int:id>', methods=['DELETE'])
+def delete(id):
+    msg = "Tarea eliminada correctamente"
+    resp = service.delete(id)
+    if not resp:
+        msg = "No se pudo eliminar la Tarea"
+    return jsonify(msg), 204  # Retorna un mensaje JSON con el código de estado 204 (NO CONTENT)
+
+
+
