@@ -1,4 +1,4 @@
-from .comentario import Comentario
 from .usuario import Usuario
-from .like import Like
-from .post import Post
+from .orden import Orden
+from .producto import Producto
+from .categorias import Categoria

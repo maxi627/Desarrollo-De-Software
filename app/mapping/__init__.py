@@ -1,4 +1,4 @@
+from .categoria_schema import CategoriaSchema
+from .orden_schema import OrdenSchema
+from .producto_schema import ProductoSchema
 from .usuario_schema import UsuarioSchema
-from .comentario_schema import ComentarioSchema
-from .like_schema import LikeSchema
-from .post_schema import PostSchema 
