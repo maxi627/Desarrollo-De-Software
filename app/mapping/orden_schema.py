@@ -8,7 +8,9 @@ class OrdenSchema(Schema):
     id_producto = fields.Integer(required=True)
     cantidad = fields.Integer(required=True)
     precio = fields.Integer(required=True)
+    producto = fields.Nested("ProductoSchema", many=False, only=("id_producto", "nombre", "precio", "stock"))
 
+    
     @post_load
     def make_orden(self, data, **kwargs):
         return Orden(**data)
