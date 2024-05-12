@@ -8,42 +8,46 @@
     #     - criteria (dict): Diccionario con los criterios de búsqueda.
 
     #     Returns:
-    #     - comentarios (List[Comentario]): Lista de comentarios que coinciden con los criterios.
+    #     - comentarios (List[Producto]): Lista de comentarios que coinciden con los criterios.
     #     """
-    #     return Comentario.query.filter_by(**criteria).all()
+    #     return Producto.query.filter_by(**criteria).all()
 
-from app.models import Comentario
+from app.models import Producto
 from app import db
 
-class ComentarioRepository:
+class ProductoRepository:
     def __init__(self):
-        self.__model = Comentario 
+        self.__model = Producto 
         
-    def get_all(self) -> list[Comentario]:
+    def get_all(self) -> list[Producto]:
         return db.session.query(self.__model).all()
 
-    def get_by_id(self, id) -> Comentario:
+    def get_by_id(self, id) -> Producto:
         return db.session.query(self.__model).get(id)
 
-    def create(self, entity: Comentario) -> Comentario:
+    def create(self, entity: Producto) -> Producto:
         db.session.add(entity)
         db.session.commit()
         return entity
 
-    def update(self, id, t: Comentario) -> Comentario:
+    def update(self, id, t: Producto) -> Producto:
         entity = self.get_by_id(id) 
         if entity: 
-            entity.contenido=t.contenido
-            entity.fecha_creacion=t.fecha_creacion
+            entity.id_producto=t.id_producto
+            entity.nombre=t.nombre
+            entity.precio=t.precio
+            entity.stock=t.stock
+            entity.id_categoria=t.id_categoria
+            
             db.session.add(entity)
             db.session.commit()
             return entity
         return None
 
     def delete(self, id) -> bool:
-        comentario = self.get_by_id(id) 
-        if comentario: 
-            db.session.delete(comentario)
+        producto = self.get_by_id(id) 
+        if producto: 
+            db.session.delete(producto)
             db.session.commit()
-            return Comentario
+            return Producto
         return None

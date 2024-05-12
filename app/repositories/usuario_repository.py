@@ -22,9 +22,10 @@ class UsuarioRepository:
     def update(self, id, t: Usuario) -> Usuario:
         entity = self.get_by_id(id)
         if entity:
-            entity.contrasena=t.contrasena
+            entity.password=t.password
             entity.email=t.email
             entity.nombre=t.nombre
+            entity.id_pedido=t.id_pedido
             db.session.add(entity)
             db.session.commit()
             return entity
