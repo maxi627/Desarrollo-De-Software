@@ -28,7 +28,7 @@ class DevelopmentConfig(Config):
     DEBUG = True  # Activa el modo de depuración
     FLASK_ENV = 'development'  # Define el entorno como desarrollo
     SQLALCHEMY_TRACK_MODIFICATIONS = True  # Habilita el seguimiento de modificaciones en SQLAlchemy
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:12345@localhost/flask_web'
+    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:12345@localhost/app_flask'
 """
 Configuración en entorno de producción
 """
@@ -38,7 +38,7 @@ class ProductionConfig(Config):
     DEBUG = False  # Desactiva el modo de depuración
     TESTING = False  # Desactiva el modo de prueba
     SQLALCHEMY_RECORD_QUERIES = False  # Desactiva el registro de consultas en SQLAlchemy
-    SQLALCHEMY_DATABASE_URI ='mysql+pymysql://root:12345@localhost/flask_web'
+    SQLALCHEMY_DATABASE_URI ='mysql+pymysql://root:12345@localhost/app_flask'
     
     @classmethod
     def init_app(cls, app):

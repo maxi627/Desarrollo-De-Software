@@ -11,7 +11,7 @@ class Usuario(db.Model):
     nombre: str = db.Column('nombre',db.String(100), nullable=False)
     email: str = db.Column('email',db.String(120), unique=True, nullable=False)
     password: str= db.Column('password',db.String(100), nullable=False)
-    id_pedido: int= db.colummn('id_pedido',db.integer,db.ForeignKey('Detalle_Orden.id_pedido'),unique=True,nullable=False)
+    id_pedido: int= db.Column('id_pedido',db.Integer,db.ForeignKey('Detalle_Orden.id_pedido'),unique=True,nullable=False)
 
 
 

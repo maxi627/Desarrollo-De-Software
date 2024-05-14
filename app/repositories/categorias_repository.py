@@ -1,22 +1,22 @@
-from app.models import Categorias
+from app.models import Categoria
 from app import db
 
-class CategoriasRepository:
+class CategoriaRepository:
     def __init__(self):
-        self.__model = Categorias
+        self.__model = Categoria
 
-    def get_all(self) -> list[Categorias]:
+    def get_all(self) -> list[Categoria]:
         return db.session.query(self.__model).all()
 
-    def get_by_id(self, id) -> Categorias:
+    def get_by_id(self, id) -> Categoria:
         return db.session.query(self.__model).get(id)
 
-    def create(self, entity: Categorias) -> Categorias:
+    def create(self, entity: Categoria) -> Categoria:
         db.session.add(entity)
         db.session.commit()
         return entity
 
-    def update(self, id, t: Categorias) -> Categorias:
+    def update(self, id, t: Categoria) -> Categoria:
         entity = self.get_by_id(id)
         if entity:
             entity.id_categoria= t.id_categoria
@@ -27,9 +27,9 @@ class CategoriasRepository:
         return None
 
     def delete(self, id)-> bool:
-        categorias = self.get_by_id(id)
-        if categorias:
-            db.session.delete(categorias)
+        Categoria = self.get_by_id(id)
+        if Categoria:
+            db.session.delete(Categoria)
             db.session.commit()
-            return categorias
+            return Categoria
         return None

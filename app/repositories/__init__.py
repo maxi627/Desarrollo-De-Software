@@ -1,4 +1,4 @@
 from .usuario_repository import UsuarioRepository
-from .producto_repository import OrdenRepository
-from .categorias_repository import ProductoRepository
-from .orden_repository import CategoriasRepository
+from .producto_repository import ProductoRepository
+from .categorias_repository import CategoriaRepository
+from .orden_repository import OrdenRepository
