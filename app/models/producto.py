@@ -1,4 +1,3 @@
-
 from dataclasses import dataclass
 from app import db
 
@@ -12,5 +11,6 @@ class Producto(db.Model):
     stock: int = db.Column('stock', db.Integer, nullable=False)
     id_categoria: int = db.Column('id_categoria', db.Integer, db.ForeignKey('Categorias.id_categoria'), nullable=False) 
     
-    ordenes = db.relationship("Detalle Orden", backref="producto", lazy=True)
-    categoria = db.relationship("Categoria", backref="productos", lazy=True)
+    # Relaciones
+    ordenes = db.relationship('Orden', back_populates='producto', lazy=True)
+    categoria = db.relationship('Categoria', back_populates='productos', lazy=True)
