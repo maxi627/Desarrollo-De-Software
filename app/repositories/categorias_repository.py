@@ -1,7 +1,9 @@
 from app.models import Categoria
 from app import db
+from .repository import Repository_get, Repository_create, Repository_update, Repository_delete
 
-class CategoriaRepository:
+
+class CategoriaRepository(Repository_create,Repository_delete,Repository_update,Repository_get):
     def __init__(self):
         self.__model = Categoria
 

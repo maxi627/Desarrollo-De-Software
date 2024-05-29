@@ -1,21 +1,10 @@
 
-    # CAPAZ SIRVE PARA PONER EN SERVICE
-    # def search(self, criteria):
-    #     """
-    #     Busca comentarios basados en criterios específicos.
-
-    #     Args:
-    #     - criteria (dict): Diccionario con los criterios de búsqueda.
-
-    #     Returns:
-    #     - comentarios (List[Producto]): Lista de comentarios que coinciden con los criterios.
-    #     """
-    #     return Producto.query.filter_by(**criteria).all()
-
 from app.models import Producto
 from app import db
+from .repository import Repository_get, Repository_create, Repository_update, Repository_delete
 
-class ProductoRepository:
+
+class ProductoRepository(Repository_create,Repository_delete,Repository_update,Repository_get):
     def __init__(self):
         self.__model = Producto 
         
