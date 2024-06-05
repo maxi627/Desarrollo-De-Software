@@ -1,4 +1,6 @@
 import unittest
+import sys
+sys.path.append('d:/Usuarios/Documents/3ro Ing. En Sistemas/Desarrollo De Software')
 from flask import current_app
 from app.models import User, UserData
 from app import create_app, db
@@ -28,6 +30,7 @@ class UserTestCase(unittest.TestCase):
 
     def tearDown(self):
         db.session.remove()
+        
         db.drop_all()
         self.app_context.pop()
 

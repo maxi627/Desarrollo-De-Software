@@ -1,6 +1,7 @@
 import unittest
 from sqlalchemy import text
-
+import sys
+sys.path.append('d:/Usuarios/Documents/3ro Ing. En Sistemas/Desarrollo De Software')
 from app import create_app, db
 
 
@@ -13,11 +14,12 @@ class ConnectionTestCase(unittest.TestCase):
         db.create_all()
 
     def tearDown(self):
-        db.session.remove()
-        db.drop_all()
+        with self.app.app_context():
+            db.session.remove()
+            with db.engine.connect() as connection:
+                 db.drop_all()
         self.app_context.pop()
 
-    # test connection to db
     def test_db_connection(self):
         result = db.session.query(text("'Hello world'")).one()
         self.assertEqual(result[0], 'Hello world')

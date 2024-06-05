@@ -1,4 +1,6 @@
 import unittest
+import sys
+sys.path.append('d:/Usuarios/Documents/3ro Ing. En Sistemas/Desarrollo De Software')        
 from flask import current_app
 from app import create_app
 

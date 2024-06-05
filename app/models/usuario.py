@@ -11,10 +11,10 @@ class Usuario(db.Model):
     nombre: str = db.Column('nombre', db.String(100), nullable=False)
     email: str = db.Column('email', db.String(120), unique=True, nullable=False)
     password: str = db.Column('password', db.String(100), nullable=False)
-    id_pedido: int = db.Column('id_pedido', db.Integer, db.ForeignKey('Detalle_Orden.id_pedido'), nullable=True)
+    id_detalle: int = db.Column('id_detalle', db.Integer, db.ForeignKey('Detalle_Orden.id_detalle'), nullable=True)
 
     # Relaciones
-    ordenes = db.relationship('Orden', back_populates='usuario', foreign_keys='Orden.id_pedido')
+    ordenes = db.relationship('Orden', back_populates='usuario', lazy=True)
 
     def save(self) -> 'Usuario':
         db.session.add(self)
