@@ -1,0 +1,33 @@
+@startuml Diagram de Clases
+
+class Usuario {
+    - nombre: str
+    - email: str
+    - password: str
+    - id_usuario:PK
+    - id_detalle:FK
+}
+
+class Producto{
+    - nombre: str
+    - precio: int
+    - stock: int
+    - id_producto:PK
+    - id_categoria:FK
+}
+
+class Orden {
+    - cantidad: int
+    - precio: int
+    - id_detalle:PK
+    - id_producto:FK
+}
+class Categoria{
+    - id_categoria:PK
+    - nombre:str
+}
+
+Usuario "1" *--- "1" Orden
+Categoria "1" *--- "1" Producto
+Producto "1" *--- "1" Orden
+@enduml
