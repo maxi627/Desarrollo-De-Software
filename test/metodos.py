@@ -1,32 +1,24 @@
 from abc import ABC, abstractmethod
-from typing import TypeVar, Generic, List, Type
-from sqlalchemy.orm import Session
-from app import db
+from flask import current_app
+from app import create_app, db
+import unittest
 
 
-T = TypeVar('T')
-
-
-class Test_Setup(ABC):
+class Test_setUp(unittest.TestCase, ABC):
     @abstractmethod
-    def Setup(self):
+    def setUp(self):
         self.app = create_app()
         self.app_context = self.app.app_context()
         self.app_context.push()
-    pass  
-class Test_create(ABC):
-    
+        db.create_all()
+        
+class Test_teardown(unittest.TestCase,ABC):
     @abstractmethod
-    pass
-    
-class Test_update(ABC):
-    
-    @abstractmethod
-    def update(self, id, entity: T) -> T:
-        pass
-    
-class Test_delete(ABC):
-    
-    @abstractmethod 
-    def delete(self, id) -> bool:
-        pass
+    def tearDown(self):
+        db.session.remove()
+        db.drop_all()
+        self.app_context.pop()
+        
+class Test_app(unittest.TestCase,ABC):
+    def test_app(self):
+        self.assertIsNotNone(current_app)

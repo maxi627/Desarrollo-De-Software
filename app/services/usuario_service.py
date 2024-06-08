@@ -9,11 +9,7 @@ class UsuarioService:
 
     def get_all(self) -> list[Usuario]:
         users= self.repository.get_all()
-        
-        def mayus(user: Usuario) ->Usuario:
-            user.nombre= user.nombre.title()
-            return user
-        return list(map(mayus,users))
+        return list(users)
     
     def get_all_inicial(self, inicial) -> list[Usuario]:
         users = self.repository.get_all()

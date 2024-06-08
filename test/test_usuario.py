@@ -10,7 +10,6 @@ class UsuarioTestCase(unittest.TestCase):
     Test User model
     Aplicando principios como DRY (Don't Repeat Yourself) y KISS (Keep It Simple, Stupid).
     """
-
     def setUp(self):
         self.app = create_app()
         self.app_context = self.app.app_context()
