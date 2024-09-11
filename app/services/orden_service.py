@@ -21,3 +21,7 @@ class OrdenService:
 
     def delete(self, id)->bool:
         return self.repository.delete(id)
+    
+    def save(self, entity: Orden) -> Orden:
+        return self.repository.save(entity)
+     

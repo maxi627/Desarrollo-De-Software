@@ -3,15 +3,21 @@ from typing import TypeVar, Generic, List, Type
 from sqlalchemy.orm import Session
 from app import db
 
-
 T = TypeVar('T')
 
+class Repository_save(ABC):
+    @abstractmethod
+    def save(self, entity: T) -> T:
+        db.session.add(entity)
+        db.session.commit()
+        return entity
+    
 class Repository_get(ABC):
     @abstractmethod
     def get_all(self) -> List[T]:
         pass
 
-    @abstractmethod
+    @abstractmethod 
     def get_by_id(self, id) -> T:
         pass
     

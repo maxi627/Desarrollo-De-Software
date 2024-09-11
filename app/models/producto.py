@@ -9,7 +9,7 @@ class Producto(db.Model):
     nombre: str = db.Column('nombre', db.Text, nullable=False)
     precio: int = db.Column('precio', db.Integer, nullable=False)
     stock: int = db.Column('stock', db.Integer, nullable=False)
-    id_categoria: int = db.Column('id_categoria', db.Integer, db.ForeignKey('Categorias.id_categoria'), nullable=False) 
+    id_categoria: int = db.Column('id_categoria', db.Integer, db.ForeignKey('Categorias.id_categoria'), nullable=True) 
     
     # Relaciones
     ordenes = db.relationship('Orden', back_populates='producto', lazy=True)

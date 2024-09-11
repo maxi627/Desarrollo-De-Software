@@ -3,7 +3,10 @@ from flask import current_app
 from app import create_app, db
 import unittest
 
-
+"""
+    Test User model
+    Aplicando principios como DRY (Don't Repeat Yourself) y KISS (Keep It Simple, Stupid).
+  """
 class Test_setUp(unittest.TestCase, ABC):
     @abstractmethod
     def setUp(self):

@@ -1,10 +1,10 @@
 from app.models import Orden  
 from app import db  
-from .repository import Repository_get, Repository_create, Repository_update, Repository_delete
+from .repository import Repository_get, Repository_create, Repository_update, Repository_delete,Repository_save
 
 
 
-class OrdenRepository(Repository_get,Repository_create,Repository_delete,Repository_update):
+class OrdenRepository(Repository_get,Repository_create,Repository_delete,Repository_update,Repository_save):
     def __init__(self):
         self.__model = Orden  
 
@@ -41,3 +41,8 @@ class OrdenRepository(Repository_get,Repository_create,Repository_delete,Reposit
             db.session.commit()  
             return orden  
         return None  
+    def save(self, entity: Orden) -> Orden:
+        db.session.add(entity) 
+        db.session.commit()
+        return entity
+         

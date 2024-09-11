@@ -21,3 +21,7 @@ class ProductoService:
 
     def delete(self, id)->bool:
         return self.repository.delete(id)
+    
+    def save(self, entity: Producto) -> Producto:
+        return self.repository.save(entity)
+     

@@ -1,9 +1,9 @@
 from app.models import Usuario
 from app import db
-from .repository import Repository_get, Repository_create, Repository_update, Repository_delete
+from .repository import Repository_get, Repository_create, Repository_update, Repository_delete,Repository_save
 
 
-class UsuarioRepository(Repository_get,Repository_create,Repository_update,Repository_delete):  
+class UsuarioRepository(Repository_save,Repository_get,Repository_create,Repository_update,Repository_delete):  
      def __init__(self):
          self.__model = Usuario
 
@@ -44,3 +44,8 @@ class UsuarioRepository(Repository_get,Repository_create,Repository_update,Repos
              db.session.commit()
              return True
          return False
+     def save(self, entity: Usuario) -> Usuario:
+        db.session.add(entity) 
+        db.session.commit()
+        return entity
+     

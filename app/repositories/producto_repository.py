@@ -1,10 +1,10 @@
 
 from app.models import Producto
 from app import db
-from .repository import Repository_get, Repository_create, Repository_update, Repository_delete
+from .repository import Repository_get, Repository_create, Repository_update, Repository_delete,Repository_save
 
 
-class ProductoRepository(Repository_create,Repository_delete,Repository_update,Repository_get):
+class ProductoRepository(Repository_create,Repository_delete,Repository_update,Repository_get,Repository_save):
     def __init__(self):
         self.__model = Producto 
         
@@ -40,3 +40,9 @@ class ProductoRepository(Repository_create,Repository_delete,Repository_update,R
             db.session.commit()
             return Producto
         return None
+    
+    def save(self, entity: Producto) -> Producto:
+        db.session.add(entity) 
+        db.session.commit()
+        return entity
+     

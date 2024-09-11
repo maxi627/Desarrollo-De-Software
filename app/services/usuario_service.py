@@ -26,3 +26,7 @@ class UsuarioService:
 
     def delete(self, id)->bool:
         return self.repository.delete(id)
+    
+    def save(self, entity: Usuario) -> Usuario:
+        return self.repository.save(entity)
+     

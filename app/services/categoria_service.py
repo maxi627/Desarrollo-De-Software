@@ -21,3 +21,7 @@ class CategoriaService:
 
     def delete(self, id)->bool:
         return self.repository.delete(id)
+    
+    def save(self, entity: Categoria) -> Categoria:
+        return self.repository.save(entity)
+     

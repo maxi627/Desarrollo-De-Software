@@ -1,9 +1,9 @@
 from app.models import Categoria
 from app import db
-from .repository import Repository_get, Repository_create, Repository_update, Repository_delete
+from .repository import Repository_get, Repository_create, Repository_update, Repository_delete,Repository_save
 
 
-class CategoriaRepository(Repository_create,Repository_delete,Repository_update,Repository_get):
+class CategoriaRepository(Repository_create,Repository_delete,Repository_update,Repository_get,Repository_save):
     def __init__(self):
         self.__model = Categoria
 
@@ -35,3 +35,9 @@ class CategoriaRepository(Repository_create,Repository_delete,Repository_update,
             db.session.commit()
             return Categoria
         return None
+    
+    def save(self, entity: Categoria) -> Categoria:
+        db.session.add(entity) 
+        db.session.commit()
+        return entity
+     
