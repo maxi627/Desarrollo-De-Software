@@ -1,60 +1,60 @@
 from flask import jsonify, Blueprint, request
-from app.mapping import UsuarioSchema
-from app.services import UsuarioService
+from app.mapping import UserSchema
+from app.services import UserService
 
-usuario = Blueprint('usuario', __name__)
-service = UsuarioService()
-usuario_schema = UsuarioSchema()
+user = Blueprint('User', __name__)
+service = UserService()
+user_schema = UserSchema()
 
 """
-Obtiene todos las usuarios
+Obtiene todos las Users
 """
-@usuario.route('/usuarios', methods=['GET'])
+@user.route('/Users', methods=['GET'])
 def all():
-    resp = usuario_schema.dump(service.get_all(), many=True) 
+    resp = user_schema.dump(service.get_all(), many=True) 
     return resp, 200
 
 """
-filtra los usuarios por su inicial
+filtra los Users por su inicial
 """
-@usuario.route('/usuarios_inicial/<string:inicial>', methods=['GET'])
+@user.route('/Users_inicial/<string:inicial>', methods=['GET'])
 def all_inv(inicial):
-    resp = usuario_schema.dump(service.get_all_inicial(inicial), many=True) 
+    resp =user_schema.dump(service.get_all_inicial(inicial), many=True) 
     return resp, 200
 
 """
-Obtiene una usuario por id
+Obtiene una User por id
 """
-@usuario.route('/usuarios/<int:id>', methods=['GET'])
+@user.route('/Users/<int:id>', methods=['GET'])
 def one(id):
-    resp = usuario_schema.dump(service.get_by_id(id)) 
+    resp = user_schema.dump(service.get_by_id(id)) 
     return resp, 200
 
 """
-Crea nueva usuario
+Crea nueva User
 """
-@usuario.route('/usuarios', methods=['POST'])
+@user.route('/Users', methods=['POST'])
 def create():
-    usuario = usuario_schema.load(request.json)
-    resp = usuario_schema.dump(service.create(usuario))
+    User = user_schema.load(request.json)
+    resp = user_schema.dump(service.create(User))
     return resp, 201
 
 """
-Actualiza una usuario existente
+Actualiza una User existente
 """
-@usuario.route('/usuarios/<int:id>', methods=['PUT'])
+@user.route('/Users/<int:id>', methods=['PUT'])
 def update(id):
-    usuario = usuario_schema.load(request.json)
-    resp = usuario_schema.dump(service.update(id, usuario))
+    User = user_schema.load(request.json)
+    resp = user_schema.dump(service.update(id, User))
     return resp, 200
 
 """
-Elimina un usuario existente
+Elimina un User existente
 """
-@usuario.route('/usuarios/<int:id>', methods=['DELETE'])
+@user.route('/Users/<int:id>', methods=['DELETE'])
 def delete(id):
-    msg = "usuario eliminado correctamente"
+    msg = "User eliminado correctamente"
     resp = service.delete(id)
     if not resp:
-        msg = "No se pudo eliminar el usuario"
+        msg = "No se pudo eliminar el User"
     return jsonify(msg), 204
