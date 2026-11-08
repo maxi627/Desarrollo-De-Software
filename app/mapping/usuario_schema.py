@@ -5,13 +5,12 @@ from app.models import User
 class UserSchema(Schema):
     # Define campos del esquema y establece reglas de validación y serialización
 
-    id = fields.Integer(dump_only=True)  # Campo 'id' de tipo Integer (solo para volcado/serialización)
-    nombre = fields.String(required=True, validate=validate.Length(min=2, max=120))  
-    email = fields.String(required=True, validate=validate.Email()) 
-    id_pedido = fields.Int(required=True)
-    password = fields.String(load_only=True)  # Campo 'password' de tipo String (solo para carga/deserialización)
+    id_user = fields.Integer(dump_only=True)  # Solo para volcado/serialización
+    nombre = fields.String(required=True, validate=validate.Length(min=2, max=120))
+    email = fields.String(required=True, validate=validate.Email())
+    id_detalle = fields.Integer(allow_none=True)  # Detalle de orden asociado (opcional)
+    password = fields.String(required=True, load_only=True)  # Solo para carga: nunca se devuelve
 
-    User= fields.Nested("OrdenSchema", many=True, only=("id_detalle","id_pedido","id_producto","cantidad","precio"))
     # Método para manejar la carga de datos (deserialización)
     @post_load
     def make_User(self, data, **kwargs):

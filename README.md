@@ -160,7 +160,7 @@ python -m unittest discover -s test -p "test*.py" -v
 | `test/test_categoria.py` | Modelo `Categoria` |
 | `test/test_producto.py` | Guardar, buscar, listar y eliminar productos |
 | `test/test_orden.py` | Guardar, buscar, listar y eliminar órdenes |
-| `test/test_usuario.py` | Guardar, buscar, listar y eliminar usuarios |
+| `test/test_usuario.py` | CRUD de usuarios, que la contraseña se guarde hasheada, `check_auth`, intercambio de Werkzeug por Passlib y el endpoint `POST /Users` |
 
 > ⚠️ No hay una configuración separada para tests: corren contra la base de desarrollo, y varios terminan con `db.drop_all()`, que **borra las tablas**. Usá una base descartable para correrlos.
 

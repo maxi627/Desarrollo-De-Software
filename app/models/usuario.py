@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from typing import List
 from app import db
-from werkzeug.security import generate_password_hash, check_password_hash
 
 @dataclass
 class User(db.Model):
@@ -10,7 +9,9 @@ class User(db.Model):
     id_user: int = db.Column('id', db.Integer, primary_key=True)
     nombre: str = db.Column('nombre', db.String(100), nullable=False)
     email: str = db.Column('email', db.String(120), unique=True, nullable=False)
-    password: str = db.Column('password', db.String(100), nullable=False)
+    # Guarda el hash de la contraseña. El hash lo genera UserService con SecurityManager
+    # (los hashes de werkzeug/passlib superan los 100 caracteres, por eso 255).
+    password: str = db.Column('password', db.String(255), nullable=False)
     id_detalle: int = db.Column('id_detalle', db.Integer, db.ForeignKey('Detalle_Orden.id_detalle'), nullable=True)
 
     # Relaciones
@@ -36,15 +37,7 @@ class User(db.Model):
     @classmethod
     def find_by(cls, **kwargs) -> List['User']:
         return cls.query.filter_by(**kwargs).all()
-    
-    # Encriptar password
-    @property
-    def password(self):
-        raise AttributeError('password: campo de lectura no permitida')
 
-    @password.setter
-    def password(self, password):
-        self.__password = generate_password_hash(password)
-
-    def check_password(self, password) -> bool:
-        return check_password_hash(self.__password, password)
+    # El hash y la verificación de la contraseña están en app/services/security.py
+    # (SecurityManager). Antes había acá una @property "password" que pisaba la
+    # columna, y la contraseña nunca se guardaba en la base.

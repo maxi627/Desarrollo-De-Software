@@ -1,7 +1,5 @@
 import unittest
 from sqlalchemy import text
-import sys
-sys.path.append('d:/Usuarios/Documents/3ro Ing. En Sistemas/Desarrollo De Software')
 from app import create_app, db
 
 
